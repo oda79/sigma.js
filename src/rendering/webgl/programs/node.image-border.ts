@@ -68,13 +68,13 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     id: string;
     size: number;
   }
-  function getImageIndex (data) {
+  function getImageIndex (data: any) {
 	return data.image + (data.borderColor && data.borderWidth ? `${data.borderColor}${data.borderWidth}` : '')
   }
   /**
    * Helper to load an image:
    */
-  function loadImage(imageSource: string, data: NodeDisplayData): void {
+  function loadImage(imageSource: string, nodeData: NodeDisplayData): void {
     if (images[getImageIndex(nodeData)]) return;
 
     const image = new Image();
