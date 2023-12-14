@@ -77,7 +77,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
   function loadImage(imageSource: string, nodeData: NodeDisplayData): void {
     if (images[getImageIndex(nodeData)]) return;
 
-    const image = new class MyImage extends Image { nodeData: any };
+    const image = new Image();
     image.addEventListener("load", () => {
       images[getImageIndex(nodeData)] = {
         status: "pending",
@@ -96,7 +96,8 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     // Load image:
     image.setAttribute("crossOrigin", "");
     image.src = imageSource;
-    image.nodeData = nodeData;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (image as any).nodeData = nodeData;
   }
 
   /**
