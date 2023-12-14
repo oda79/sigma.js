@@ -68,8 +68,8 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     id: string;
     size: number;
   }
-  function getImageIndex (data: any) {
-	return data.image + (data.borderColor && data.borderWidth ? `${data.borderColor}${data.borderWidth}` : '')
+  function getImageIndex(data: any) {
+    return data.image + (data.borderColor && data.borderWidth ? `${data.borderColor}${data.borderWidth}` : "");
   }
   /**
    * Helper to load an image:
@@ -77,7 +77,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
   function loadImage(imageSource: string, nodeData: NodeDisplayData): void {
     if (images[getImageIndex(nodeData)]) return;
 
-    const image = new Image();
+    const image = new class MyImage extends Image { nodeData: any };
     image.addEventListener("load", () => {
       images[getImageIndex(nodeData)] = {
         status: "pending",
@@ -96,6 +96,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     // Load image:
     image.setAttribute("crossOrigin", "");
     image.src = imageSource;
+    image.nodeData = nodeData;
   }
 
   /**
@@ -120,7 +121,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
 
     // Add images to texture:
     const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d", {willReadFrequently: true}) as CanvasRenderingContext2D;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
     // limit canvas size to avoid browser and platform limits
     let totalWidth = hasReceivedImages ? textureImage.width : 0;
@@ -158,12 +159,18 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
           dy = (image.height - image.width) / 2;
         }
         ctx.drawImage(image, dx, dy, size, size, xOffset, yOffset, imageSizeInTexture, imageSizeInTexture);
-		if (image.nodeData && image.nodeData.borderColor && image.nodeData.borderWidth) {
-			ctx.beginPath();
-            ctx.lineWidth = imageSizeInTexture / image.nodeData.size * image.nodeData.borderWidth / 2;                    
-            ctx.arc(xOffset + imageSizeInTexture / 2, yOffset + imageSizeInTexture / 2, imageSizeInTexture / 2 - ctx.lineWidth/2, 0, 2 * Math.PI);
-            ctx.strokeStyle = image.nodeData.borderColor;
-            ctx.stroke();
+        if (image.nodeData && image.nodeData.borderColor && image.nodeData.borderWidth) {
+          ctx.beginPath();
+          ctx.lineWidth = ((imageSizeInTexture / image.nodeData.size) * image.nodeData.borderWidth) / 2;
+          ctx.arc(
+            xOffset + imageSizeInTexture / 2,
+            yOffset + imageSizeInTexture / 2,
+            imageSizeInTexture / 2 - ctx.lineWidth / 2,
+            0,
+            2 * Math.PI,
+          );
+          ctx.strokeStyle = image.nodeData.borderColor;
+          ctx.stroke();
         }
 
         // Update image state:
