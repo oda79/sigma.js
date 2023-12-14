@@ -64,7 +64,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
   let writeRowHeight = 0;
 
   interface PendingImage {
-    image: HTMLImageElement;
+    image: any;
     id: string;
     size: number;
   }
@@ -274,7 +274,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       let i = offset * POINTS * ATTRIBUTES;
 
       const imageSource = data.image;
-      const imageState = imageSource && images[getImageIndex(nodeData)];
+      const imageState = imageSource && images[getImageIndex(data)];
       if (typeof imageSource === "string" && !imageState) loadImage(imageSource, data);
 
       if (hidden) {
