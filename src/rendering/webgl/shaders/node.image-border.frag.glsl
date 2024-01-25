@@ -31,11 +31,12 @@ void main(void) {
   // Mix the color with the border color based on the border alpha
   color = mix(color, v_borderColor, borderAlpha);
 
-  // Determine if the fragment is inside or outside the border
-  if (dist < 0.5 - borderWidth) { // Assuming the radius of the point is 0.5
+  if (dist < radius - v_border) {
     gl_FragColor = color;
+  } else if (dist < radius) {
+    gl_FragColor = mix(transparent, color, (radius - dist) / v_border);
   } else {
-    // Mix the color with transparent if outside the border
-    gl_FragColor = mix(vec4(0.0), color, borderAlpha);
+    gl_FragColor = transparent;
   }
+
 }
