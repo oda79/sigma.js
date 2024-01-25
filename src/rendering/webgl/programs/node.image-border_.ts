@@ -64,20 +64,22 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
   let writeRowHeight = 0;
 
   interface PendingImage {
-    image: HTMLImageElement;
+    image: any;
     id: string;
     size: number;
   }
-
+  function getImageIndex(data: any) {
+    return data.image + (data.borderColor && data.borderWidth ? `${data.borderColor}${data.borderWidth}` : "");
+  }
   /**
    * Helper to load an image:
    */
-  function loadImage(imageSource: string): void {
-    if (images[imageSource]) return;
+  function loadImage(imageSource: string, nodeData: NodeDisplayData): void {
+    if (images[getImageIndex(nodeData)]) return;
 
     const image = new Image();
     image.addEventListener("load", () => {
-      images[imageSource] = {
+      images[getImageIndex(nodeData)] = {
         status: "pending",
         image,
       };
@@ -87,13 +89,15 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       }
     });
     image.addEventListener("error", () => {
-      images[imageSource] = { status: "error" };
+      images[getImageIndex(nodeData)] = { status: "error" };
     });
-    images[imageSource] = { status: "loading" };
+    images[getImageIndex(nodeData)] = { status: "loading" };
 
     // Load image:
     image.setAttribute("crossOrigin", "");
     image.src = imageSource;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (image as any).nodeData = nodeData;
   }
 
   /**
@@ -156,6 +160,19 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
           dy = (image.height - image.width) / 2;
         }
         ctx.drawImage(image, dx, dy, size, size, xOffset, yOffset, imageSizeInTexture, imageSizeInTexture);
+        if (image.nodeData && image.nodeData.borderColor && image.nodeData.borderWidth) {
+          ctx.beginPath();
+          ctx.lineWidth = ((imageSizeInTexture / image.nodeData.size) * image.nodeData.borderWidth) / 2;
+          ctx.arc(
+            xOffset + imageSizeInTexture / 2,
+            yOffset + imageSizeInTexture / 2,
+            imageSizeInTexture / 2 - ctx.lineWidth / 2,
+            0,
+            2 * Math.PI,
+          );
+          ctx.strokeStyle = image.nodeData.borderColor;
+          ctx.stroke();
+        }
 
         // Update image state:
         images[id] = {
@@ -265,8 +282,8 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       let i = offset * POINTS * ATTRIBUTES;
 
       const imageSource = data.image;
-      const imageState = imageSource && images[imageSource];
-      if (typeof imageSource === "string" && !imageState) loadImage(imageSource);
+      const imageState = imageSource && images[getImageIndex(data)];
+      if (typeof imageSource === "string" && !imageState) loadImage(imageSource, data);
 
       if (hidden) {
         array[i++] = 0;
@@ -315,24 +332,6 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       gl.uniform1f(this.scaleLocation, params.scalingRatio);
       gl.uniformMatrix3fv(this.matrixLocation, false, params.matrix);
       gl.uniform1i(this.atlasLocation, 0);
-
-      // Convert hex color to RGBA format
-      const hexToRGBA = (hex: string) => {
-        hex = hex.replace(/^#/, "");
-        const bigint = parseInt(hex, 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        const a = 1; // You can set the alpha channel as needed
-        return [r / 255, g / 255, b / 255, a];
-      };
-
-      // Get the uniform location for the border color
-      const borderColorLocation = gl.getUniformLocation(program, "u_borderColor");
-
-      // Set the value of the border color uniform
-      const borderColorRGBA = hexToRGBA("#de6ede");
-      gl.uniform4f(borderColorLocation, borderColorRGBA[0], borderColorRGBA[1], borderColorRGBA[2], borderColorRGBA[3]);
 
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }
