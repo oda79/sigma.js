@@ -3,12 +3,10 @@ precision mediump float;
 varying vec4 v_color;
 varying float v_border;
 varying vec4 v_texture;
-varying vec4 v_borderColor; // Add a varying for the border color
-varying float v_borderWidth; // Add a varying for the border width
+uniform vec4 v_borderColor; // Declare v_borderColor as a uniform
+varying float v_borderWidth; // Declare v_borderWidth as a uniform
 
 uniform sampler2D u_atlas;
-uniform vec4 u_borderColor; // Declare the uniform for border color
-uniform float u_borderWidth; // Declare the uniform for border width
 
 const float radius = 0.5;
 const vec4 transparent = vec4(0.0, 0.0, 0.0, 0.0);
