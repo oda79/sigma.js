@@ -4,6 +4,7 @@ varying vec4 v_color;
 varying float v_border;
 varying vec4 v_texture;
 varying vec4 v_borderColor; // Add a varying for the border color
+varying float v_borderWidth; // Add a varying for the border width
 
 uniform sampler2D u_atlas;
 
@@ -22,18 +23,9 @@ void main(void) {
 
   vec2 m = gl_PointCoord - vec2(0.5, 0.5);
   float dist = length(m);
-
-  if (dist < radius - v_border) {
-    gl_FragColor = color;
-  } else if (dist < radius) {
-    gl_FragColor = mix(transparent, color, (radius - dist) / v_border);
-  } else {
-    gl_FragColor = transparent;
-  }
-
-    // Blend border color with node color
-  vec4 borderColor = v_borderColor; // Use the passed border color
-  color = mix(color, borderColor, borderAlpha);
+  float borderWidth = v_borderWidth; // Use v_borderWidth for border width
+  float borderAlpha = smoothstep(radius - borderWidth, radius, dist);
+  color = mix(color, v_borderColor, borderAlpha);
 
   if (dist < radius - borderWidth) {
     gl_FragColor = color;

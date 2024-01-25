@@ -8,8 +8,8 @@
  */
 import { Coordinates, Dimensions, NodeDisplayData } from "../../../types";
 import { floatColor } from "../../../utils";
-import vertexShaderSource from "../shaders/node.image.vert.glsl";
-import fragmentShaderSource from "../shaders/node.image.frag.glsl";
+import vertexShaderSource from "../shaders/node.image-border.vert.glsl";
+import fragmentShaderSource from "../shaders/node.image-border.frag.glsl";
 import { AbstractNodeProgram } from "./common/node";
 import { RenderParams } from "./common/program";
 import Sigma from "../../../sigma";
@@ -333,6 +333,10 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       // Set the value of the border color uniform
       const borderColorRGBA = hexToRGBA("#de6ede");
       gl.uniform4f(borderColorLocation, borderColorRGBA[0], borderColorRGBA[1], borderColorRGBA[2], borderColorRGBA[3]);
+
+      const borderWidthLocation = gl.getUniformLocation(program, "u_borderWidth");
+      // Set the value of the border width uniform
+      gl.uniform1f(borderWidthLocation, 10);
 
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }

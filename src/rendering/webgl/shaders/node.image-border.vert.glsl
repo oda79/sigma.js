@@ -6,11 +6,12 @@ attribute vec4 a_texture;
 uniform float u_ratio;
 uniform float u_scale;
 uniform mat3 u_matrix;
-uniform vec4 u_borderColor;
 
 varying vec4 v_color;
 varying float v_border;
 varying vec4 v_texture;
+varying vec4 v_borderColor; // Add a varying for the border color
+varying float v_borderWidth; // Add a varying for the border width
 
 const float bias = 255.0 / 254.0;
 
@@ -34,6 +35,7 @@ void main() {
 
   // Pass the texture coordinates:
   v_texture = a_texture;
-  
+
   v_borderColor = u_borderColor;
+  v_borderWidth = u_borderWidth;
 }
