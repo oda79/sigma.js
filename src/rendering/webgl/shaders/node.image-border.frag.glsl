@@ -27,10 +27,16 @@ void main(void) {
   float borderAlpha = smoothstep(radius - borderWidth, radius, dist);
   color = mix(color, v_borderColor, borderAlpha);
 
-  if (dist < radius - v_border) {
-    gl_FragColor = color;
-  } else if (dist < radius) {
-    gl_FragColor = mix(transparent, color, (radius - dist) / v_border);
+  if (dist < radius - borderWidth) {
+    if (v_texture.w > 0.0) {
+      vec4 texel = texture2D(u_atlas, v_texture.xy + gl_PointCoord * v_texture.zw, -1.0);
+      color = vec4(mix(v_color, texel, texel.a).rgb, max(texel.a, v_color.a));
+    } else {
+      color = v_color;
+    }    
+      gl_FragColor = color;
+  } else if (dist < radius) {  
+    gl_FragColor =  mix(transparent, v_borderColor, (radius - dist) / borderWidth);
   } else {
     gl_FragColor = transparent;
   }
