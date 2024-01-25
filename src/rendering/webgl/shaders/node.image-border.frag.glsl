@@ -7,6 +7,8 @@ varying vec4 v_borderColor; // Add a varying for the border color
 varying float v_borderWidth; // Add a varying for the border width
 
 uniform sampler2D u_atlas;
+uniform vec4 u_borderColor; // Declare the uniform for border color
+uniform float u_borderWidth; // Declare the uniform for border width
 
 const float radius = 0.5;
 const vec4 transparent = vec4(0.0, 0.0, 0.0, 0.0);
