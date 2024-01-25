@@ -217,6 +217,8 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     textureLocation: GLint;
     atlasLocation: WebGLUniformLocation;
     latestRenderParams?: RenderParams;
+    borderColorLocation: WebGLUniformLocation | null = null;
+    borderWidthLocation: WebGLUniformLocation | null = null;
 
     constructor(gl: WebGLRenderingContext, renderer: Sigma) {
       super(gl, vertexShaderSource, fragmentShaderSource, POINTS, ATTRIBUTES);
@@ -235,6 +237,13 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       const atlasLocation = gl.getUniformLocation(this.program, "u_atlas");
       if (atlasLocation === null) throw new Error("NodeProgramImage: error while getting atlasLocation");
       this.atlasLocation = atlasLocation;
+
+      // Get the uniform locations for border color and width
+      this.borderColorLocation = gl.getUniformLocation(this.program, "u_borderColor");
+      if (this.borderColorLocation === null) throw new Error("Unable to get uniform location for u_borderColor");
+
+      this.borderWidthLocation = gl.getUniformLocation(this.program, "u_borderWidth");
+      if (this.borderWidthLocation === null) throw new Error("Unable to get uniform location for u_borderWidth");
 
       // Initialize WebGL texture:
       this.texture = gl.createTexture() as WebGLTexture;
@@ -327,16 +336,11 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
         return [r / 255, g / 255, b / 255, a];
       };
 
-      // Get the uniform locations for the border color and width
-      const borderColorLocation = gl.getUniformLocation(program, "u_borderColor");
-      const borderWidthLocation = gl.getUniformLocation(program, "u_borderWidth");
-
-      // Set the value of the border color uniform
       const borderColorRGBA = hexToRGBA("#de5ede");
-      gl.uniform4fv(borderColorLocation, borderColorRGBA); // Use glUniform4fv for setting vec4 uniform
+      gl.uniform4fv(this.borderColorLocation, borderColorRGBA);
 
       // Set the value of the border width uniform
-      gl.uniform1f(borderWidthLocation, 10);
+      gl.uniform1f(this.borderWidthLocation, 10);
 
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }
