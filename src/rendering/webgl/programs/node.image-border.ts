@@ -327,14 +327,14 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
         return [r / 255, g / 255, b / 255, a];
       };
 
-      // Get the uniform location for the border color
+      // Get the uniform locations for the border color and width
       const borderColorLocation = gl.getUniformLocation(program, "u_borderColor");
+      const borderWidthLocation = gl.getUniformLocation(program, "u_borderWidth");
 
       // Set the value of the border color uniform
-      const borderColorRGBA = hexToRGBA("#de6ede");
-      gl.uniform4f(borderColorLocation, borderColorRGBA[0], borderColorRGBA[1], borderColorRGBA[2], borderColorRGBA[3]);
+      const borderColorRGBA = hexToRGBA("#de5ede");
+      gl.uniform4fv(borderColorLocation, borderColorRGBA); // Use glUniform4fv for setting vec4 uniform
 
-      const borderWidthLocation = gl.getUniformLocation(program, "u_borderWidth");
       // Set the value of the border width uniform
       gl.uniform1f(borderWidthLocation, 10);
 

@@ -22,20 +22,18 @@ void main() {
     1
   );
 
-  // Multiply the point size twice:
-  //  - x SCALING_RATIO to correct the canvas scaling
-  //  - x 2 to correct the formulae
   gl_PointSize = a_size * u_ratio * u_scale * 2.0;
 
   v_border = (1.0 / u_ratio) * (0.5 / a_size);
 
-  // Extract the color:
   v_color = a_color;
   v_color.a *= bias;
 
-  // Pass the texture coordinates:
   v_texture = a_texture;
 
+  // Pass the border color to the fragment shader
   v_borderColor = u_borderColor;
+
+  // Pass the border width to the fragment shader
   v_borderWidth = u_borderWidth;
 }
