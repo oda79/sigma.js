@@ -3,12 +3,13 @@ precision mediump float;
 varying vec4 v_color;
 varying float v_border;
 varying vec4 v_texture;
-varying vec4 v_borderColor;
-varying float v_borderWidth;
+varying vec4 v_borderColor; // Change v_borderColor from uniform to varying
+varying float v_borderWidth; // Declare v_borderWidth as a uniform
 
 uniform sampler2D u_atlas;
 
-const float bias = 255.0 / 254.0;
+const float radius = 0.5;
+const vec4 transparent = vec4(0.0, 0.0, 0.0, 0.0);
 
 void main(void) {
   vec4 color;
@@ -21,14 +22,9 @@ void main(void) {
   }
 
   vec2 m = gl_PointCoord - vec2(0.5, 0.5);
-  float dist = length(m); // Distance from fragment to point center
-  float borderWidth = v_borderWidth; // Border width
-
-  // Calculate the border alpha based on the distance from the center of the point
-  // to the fragment coordinates using the Pythagorean theorem
+  float dist = length(m);
+  float borderWidth = v_borderWidth; // Use v_borderWidth for border width
   float borderAlpha = smoothstep(radius - borderWidth, radius, dist);
-
-  // Mix the color with the border color based on the border alpha
   color = mix(color, v_borderColor, borderAlpha);
 
   if (dist < radius - v_border) {
