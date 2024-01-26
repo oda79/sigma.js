@@ -13,6 +13,7 @@ import fragmentShaderSource from "../shaders/node.image-border.frag.glsl";
 import { AbstractNodeProgram } from "./common/node";
 import { RenderParams } from "./common/program";
 import Sigma from "../../../sigma";
+import { Settings } from "../../../settings";
 
 const POINTS = 1,
   ATTRIBUTES = 8,
@@ -56,6 +57,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
   let textureImage: ImageData;
   let hasReceivedImages = false;
   let pendingImagesFrameID: number | undefined = undefined;
+  const rendererSettings
 
   // next write position in texture
   let writePositionX = 0;
@@ -219,6 +221,8 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     latestRenderParams?: RenderParams;
     borderColorLocation: WebGLUniformLocation | null = null;
     borderWidthLocation: WebGLUniformLocation | null = null;
+    selectionColorLocation: WebGLUniformLocation | null = null;
+    rendererSettings: Settings | null = null;
 
     constructor(gl: WebGLRenderingContext, renderer: Sigma) {
       super(gl, vertexShaderSource, fragmentShaderSource, POINTS, ATTRIBUTES);
@@ -230,6 +234,9 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
 
       textureImage = new ImageData(1, 1);
 
+      // Save renderer (Sigma) global settings 
+      this.rendererSettings = renderer.getSettings();
+
       // Attribute Location
       this.textureLocation = gl.getAttribLocation(this.program, "a_texture");
 
@@ -238,12 +245,13 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       if (atlasLocation === null) throw new Error("NodeProgramImage: error while getting atlasLocation");
       this.atlasLocation = atlasLocation;
 
-      // Get the uniform locations for border color and width
+      // Get the uniform location for border color
       this.borderColorLocation = gl.getUniformLocation(this.program, "u_borderColor");
       if (this.borderColorLocation === null) throw new Error("Unable to get uniform location for u_borderColor");
 
-      this.borderWidthLocation = gl.getUniformLocation(this.program, "u_borderWidth");
-      if (this.borderWidthLocation === null) throw new Error("Unable to get uniform location for u_borderWidth");
+      // Get the uniform location for border color of a selected node/edge
+      this.selectionColorLocation = gl.getUniformLocation(this.program, "u_selectionColor");
+      if (this.selectionColorLocation === null) throw new Error("Unable to get uniform location for u_selectionColor");
 
       // Initialize WebGL texture:
       this.texture = gl.createTexture() as WebGLTexture;
@@ -261,7 +269,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       gl.enableVertexAttribArray(this.textureLocation);
       gl.vertexAttribPointer(
         this.textureLocation,
-        4,
+        6,
         gl.FLOAT,
         false,
         this.attributes * Float32Array.BYTES_PER_ELEMENT,
@@ -282,11 +290,13 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
         array[i++] = 0;
         array[i++] = 0;
         array[i++] = 0;
+        array[i++] = 0;
+        array[i++] = 0;
         // Texture:
         array[i++] = 0;
         array[i++] = 0;
         array[i++] = 0;
-        array[i++] = 0;
+        array[i++] = 0;    
         return;
       }
 
@@ -294,6 +304,8 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       array[i++] = data.y;
       array[i++] = data.size;
       array[i++] = floatColor(data.color);
+      array[i++] = floatColor(data.borderColor);
+      array[i++] = data.opacity;
 
       // Reference texture:
       if (imageState && imageState.status === "ready") {
@@ -324,23 +336,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       gl.uniform1f(this.scaleLocation, params.scalingRatio);
       gl.uniformMatrix3fv(this.matrixLocation, false, params.matrix);
       gl.uniform1i(this.atlasLocation, 0);
-
-      // Convert hex color to RGBA format
-      const hexToRGBA = (hex: string) => {
-        hex = hex.replace(/^#/, "");
-        const bigint = parseInt(hex, 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        const a = 1; // You can set the alpha channel as needed
-        return [r / 255, g / 255, b / 255, a];
-      };
-
-      const borderColorRGBA = hexToRGBA("#de5ede");
-      gl.uniform4fv(this.borderColorLocation, borderColorRGBA);
-
-      // Set the value of the border width uniform
-      gl.uniform1f(this.borderWidthLocation, 0.5);
+      gl.uniform1f(this.selectionColorLocation, floatColor(this.rendererSettings.selectionColor));
 
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }

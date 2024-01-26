@@ -63,10 +63,12 @@ export interface DisplayData {
   forceLabel: boolean;
   zIndex: number;
   type: string;
+  opacity: number;
 }
 
 export interface NodeDisplayData extends Coordinates, DisplayData {
   highlighted: boolean;
+  borderColor: string;
 }
 
 export interface EdgeDisplayData extends DisplayData {}
