@@ -340,7 +340,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       gl.uniform4fv(this.borderColorLocation, borderColorRGBA);
 
       // Set the value of the border width uniform
-      gl.uniform1f(this.borderWidthLocation, 10);
+      gl.uniform1f(this.borderWidthLocation, 0.5);
 
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }
