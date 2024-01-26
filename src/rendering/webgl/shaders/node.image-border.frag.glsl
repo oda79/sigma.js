@@ -9,6 +9,7 @@ varying float v_borderWidth; // Declare v_borderWidth as a uniform
 uniform sampler2D u_atlas;
 
 const float radius = 0.5;
+const float v_imageBorderWidth = 0.05;
 const vec4 transparent = vec4(0.0, 0.0, 0.0, 0.0);
 
 void main(void) {
@@ -34,11 +35,14 @@ void main(void) {
     } else {
       color = v_color;
     }    
-      gl_FragColor = color;
+    if (dist < radius - v_imageBorderWidth) {
+      float borderAlpha = smoothstep(radius - v_imageBorderWidth, radius, dist);
+      color = mix(color, transparent, borderAlpha);
+    }
+    gl_FragColor = color;
   } else if (dist < radius) {  
     gl_FragColor =  mix(transparent, v_borderColor, (radius - dist) / borderWidth);
   } else {
     gl_FragColor = transparent;
   }
-
 }
