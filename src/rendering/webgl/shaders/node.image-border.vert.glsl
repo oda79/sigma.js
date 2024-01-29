@@ -35,8 +35,5 @@ void main() {
 
   // Assign the uniform border color
   v_borderColor = a_borderColor;
-
-  // Assign the uniform border width
-  v_borderWidth = u_borderWidth;
   v_opacity = a_opacity;
 }

@@ -218,8 +218,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     textureLocation: GLint;
     atlasLocation: WebGLUniformLocation;
     latestRenderParams?: RenderParams;
-    borderColorLocation: WebGLUniformLocation | null = null;
-    borderWidthLocation: WebGLUniformLocation | null = null;
+    borderColorLocation: WebGLUniformLocation | null = null;  
     opacityLocation: WebGLUniformLocation | null = null;
     selectionColorLocation: WebGLUniformLocation | null = null;
     rendererSettings: Settings = DEFAULT_SETTINGS;
@@ -247,7 +246,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
 
       // Get the uniform location for border color
       this.borderColorLocation = gl.getUniformLocation(this.program, "u_borderColor");
-      if (this.borderColorLocation === null) throw new Error("Unable to get uniform location for u_borderColor");
+      if (this.borderColorLocation === null) throw new Error("Unable to get uniform location for u_borderColor");    
 
       // Get the uniform location for border color
       this.opacityLocation = gl.getUniformLocation(this.program, "u_opacity");
@@ -340,7 +339,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       gl.uniform1f(this.scaleLocation, params.scalingRatio);
       gl.uniformMatrix3fv(this.matrixLocation, false, params.matrix);
       gl.uniform1i(this.atlasLocation, 0);
-      gl.uniform1f(this.selectionColorLocation, floatColor(this.rendererSettings.selectionColor));
+      gl.uniform1f(this.selectionColorLocation, floatColor(this.rendererSettings.selectionColor));      
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }
 
