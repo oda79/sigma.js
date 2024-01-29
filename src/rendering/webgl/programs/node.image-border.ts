@@ -13,7 +13,7 @@ import fragmentShaderSource from "../shaders/node.image-border.frag.glsl";
 import { AbstractNodeProgram } from "./common/node";
 import { RenderParams } from "./common/program";
 import Sigma from "../../../sigma";
-import { Settings } from "../../../settings";
+import { Settings, DEFAULT_SETTINGS } from "../../../settings";
 
 const POINTS = 1,
   ATTRIBUTES = 8,
@@ -56,8 +56,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
   const images: Record<string, ImageType> = {};
   let textureImage: ImageData;
   let hasReceivedImages = false;
-  let pendingImagesFrameID: number | undefined = undefined;
-  const rendererSettings
+  let pendingImagesFrameID: number | undefined = undefined;  
 
   // next write position in texture
   let writePositionX = 0;
@@ -221,8 +220,9 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     latestRenderParams?: RenderParams;
     borderColorLocation: WebGLUniformLocation | null = null;
     borderWidthLocation: WebGLUniformLocation | null = null;
+    opacityLocation: WebGLUniformLocation | null = null;
     selectionColorLocation: WebGLUniformLocation | null = null;
-    rendererSettings: Settings | null = null;
+    rendererSettings: Settings = DEFAULT_SETTINGS;
 
     constructor(gl: WebGLRenderingContext, renderer: Sigma) {
       super(gl, vertexShaderSource, fragmentShaderSource, POINTS, ATTRIBUTES);
@@ -248,6 +248,10 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       // Get the uniform location for border color
       this.borderColorLocation = gl.getUniformLocation(this.program, "u_borderColor");
       if (this.borderColorLocation === null) throw new Error("Unable to get uniform location for u_borderColor");
+
+      // Get the uniform location for border color
+      this.opacityLocation = gl.getUniformLocation(this.program, "u_opacity");
+      if (this.opacityLocation === null) throw new Error("Unable to get uniform location for u_opacity");      
 
       // Get the uniform location for border color of a selected node/edge
       this.selectionColorLocation = gl.getUniformLocation(this.program, "u_selectionColor");
@@ -337,7 +341,6 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       gl.uniformMatrix3fv(this.matrixLocation, false, params.matrix);
       gl.uniform1i(this.atlasLocation, 0);
       gl.uniform1f(this.selectionColorLocation, floatColor(this.rendererSettings.selectionColor));
-
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }
 

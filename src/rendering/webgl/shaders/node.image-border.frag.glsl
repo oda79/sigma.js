@@ -2,6 +2,7 @@ precision mediump float;
 
 varying vec4 v_color;
 varying float v_border;
+varying float v_opacity;
 varying vec4 v_texture;
 varying vec4 v_borderColor; // Change v_borderColor from uniform to varying
 varying float v_borderWidth; // Declare v_borderWidth as a uniform
@@ -40,6 +41,10 @@ void main(void) {
     gl_FragColor =  mix(transparent, v_borderColor, (radius - dist) / borderWidth);
   } else {
     gl_FragColor = transparent;
+  }
+
+  if (v_opacity < 1.0) {
+    gl_FragColor = vec4(gl_FragColor.rgb, v_opacity);
   }
 
 }
