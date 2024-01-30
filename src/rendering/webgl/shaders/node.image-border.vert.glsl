@@ -1,17 +1,19 @@
 attribute vec2 a_position;
 attribute float a_size;
 attribute vec4 a_color;
+attribute vec4 a_borderColor;
+attribute float a_opacity;
 attribute vec4 a_texture;
 
 uniform float u_ratio;
 uniform float u_scale;
 uniform mat3 u_matrix;
-uniform vec4 u_borderColor; // Declare u_borderColor as a uniform
 
 varying vec4 v_color;
 varying float v_border;
 varying vec4 v_texture;
 varying vec4 v_borderColor; // Change v_borderColor from varying to uniform
+varying float v_opacity;
 
 const float bias = 255.0 / 254.0;
 
@@ -24,7 +26,7 @@ void main() {
 
   gl_PointSize = a_size * u_ratio * u_scale * 2.0;
 
-  v_border = (1.0 / u_ratio) * (0.5 / a_size);
+  v_border = (1.0 / u_ratio) * (0.5 / a_size) * 2;
 
   v_color = a_color;
   v_color.a *= bias;
@@ -32,8 +34,8 @@ void main() {
   v_texture = a_texture;
 
   // Assign the uniform border color
-  v_borderColor = u_borderColor;
+  v_borderColor = a_borderColor;
 
-  // Assign the uniform border width
-  v_borderWidth = v_border;
+  // Assign the uniform opacity 
+  v_oapcity = a_opacity;
 }
