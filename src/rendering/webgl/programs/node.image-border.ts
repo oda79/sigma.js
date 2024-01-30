@@ -218,7 +218,6 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
     atlasLocation: WebGLUniformLocation;
     latestRenderParams?: RenderParams;
     borderColorLocation: WebGLUniformLocation | null = null;
-    borderWidthLocation: WebGLUniformLocation | null = null;
 
     constructor(gl: WebGLRenderingContext, renderer: Sigma) {
       super(gl, vertexShaderSource, fragmentShaderSource, POINTS, ATTRIBUTES);
@@ -241,9 +240,6 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       // Get the uniform locations for border color and width
       this.borderColorLocation = gl.getUniformLocation(this.program, "u_borderColor");
       if (this.borderColorLocation === null) throw new Error("Unable to get uniform location for u_borderColor");
-
-      this.borderWidthLocation = gl.getUniformLocation(this.program, "u_borderWidth");
-      if (this.borderWidthLocation === null) throw new Error("Unable to get uniform location for u_borderWidth");
 
       // Initialize WebGL texture:
       this.texture = gl.createTexture() as WebGLTexture;
@@ -338,9 +334,6 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
 
       const borderColorRGBA = hexToRGBA("#de5ede");
       gl.uniform4fv(this.borderColorLocation,borderColorRGBA);
-
-      // Set the value of the border width uniform
-      gl.uniform1f(this.borderWidthLocation, 0.5);
 
       gl.drawArrays(gl.POINTS, 0, this.array.length / ATTRIBUTES);
     }

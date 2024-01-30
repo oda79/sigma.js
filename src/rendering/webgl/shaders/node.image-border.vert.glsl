@@ -7,13 +7,11 @@ uniform float u_ratio;
 uniform float u_scale;
 uniform mat3 u_matrix;
 uniform vec4 u_borderColor; // Declare u_borderColor as a uniform
-uniform float u_borderWidth; // Declare u_borderWidth as a uniform
 
 varying vec4 v_color;
 varying float v_border;
 varying vec4 v_texture;
 varying vec4 v_borderColor; // Change v_borderColor from varying to uniform
-varying float v_borderWidth; // Change v_borderWidth from varying to uniform
 
 const float bias = 255.0 / 254.0;
 
@@ -37,5 +35,5 @@ void main() {
   v_borderColor = u_borderColor;
 
   // Assign the uniform border width
-  v_borderWidth = u_borderWidth;
+  v_borderWidth = v_border;
 }
