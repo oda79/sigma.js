@@ -254,16 +254,11 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       const gl = this.gl;
 
       gl.enableVertexAttribArray(this.borderColorLocation);
-      gl.enableVertexAttribArray(this.opacityLocation);      
+      gl.vertexAttribPointer(this.borderColorLocation, 4, gl.UNSIGNED_BYTE, true, this.attributes * Float32Array.BYTES_PER_ELEMENT, 16);
+      gl.enableVertexAttribArray(this.opacityLocation);
+      gl.vertexAttribPointer(this.opacityLocation, 1, gl.FLOAT, false, this.attributes * Float32Array.BYTES_PER_ELEMENT, 20);
       gl.enableVertexAttribArray(this.textureLocation);
-      gl.vertexAttribPointer(
-        this.textureLocation,
-        4,
-        gl.FLOAT,
-        false,
-        this.attributes * Float32Array.BYTES_PER_ELEMENT,
-        24,
-      );
+      gl.vertexAttribPointer(this.textureLocation, 4, gl.FLOAT, false, this.attributes * Float32Array.BYTES_PER_ELEMENT, 24);
     }
 
     process(data: NodeDisplayData & { image?: string }, hidden: boolean, offset: number): void {
