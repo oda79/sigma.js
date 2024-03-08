@@ -289,7 +289,7 @@ export default function getNodeImageProgram(): typeof AbstractNodeImageProgram {
       array[i++] = data.size;
       array[i++] = floatColor(data.color);
       array[i++] = floatColor(data.borderColor);
-      array[i++] = data.opacity * 0.1;
+      array[i++] = data.opacity || 0.1;
 
       // Reference texture:
       if (imageState && imageState.status === "ready") {
