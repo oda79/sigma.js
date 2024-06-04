@@ -1,0 +1,50 @@
+{
+  "name": "@sigma/node-image-border",
+  "version": "3.0.0-beta.9",
+  "description": "A node program that renders images for sigma.js",
+  "main": "dist/sigma-node-image-border.cjs.js",
+  "module": "dist/sigma-node-image-border.esm.js",
+  "types": "dist/sigma-node-image-border.cjs.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "sideEffects": false,
+  "homepage": "https://www.sigmajs.org",
+  "bugs": "http://github.com/jacomyal/sigma.js/issues",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/jacomyal/sigma.js.git"
+  },
+  "keywords": [
+    "graph",
+    "graphology",
+    "sigma"
+  ],
+  "contributors": [
+    {
+      "name": "Alexis Jacomy",
+      "url": "http://github.com/jacomyal"
+    },
+    {
+      "name": "Guillaume Plique",
+      "url": "http://github.com/Yomguithereal"
+    }
+  ],
+  "license": "MIT",
+  "preconstruct": {
+    "entrypoints": [
+      "index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "sigma": ">=3.0.0-beta.10"
+  },
+  "exports": {
+    ".": {
+      "module": "./dist/sigma-node-image-border.esm.js",
+      "import": "./dist/sigma-node-image-border.cjs.mjs",
+      "default": "./dist/sigma-node-image-border.cjs.js"
+    },
+    "./package.json": "./package.json"
+  }
+}

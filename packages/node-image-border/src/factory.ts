@@ -8,50 +8,44 @@ import {
   ProgramInfo,
 } from "sigma/rendering";
 import { NodeDisplayData, RenderParams } from "sigma/types";
-import { floatColor } from "sigma/utils";
+import { colorToArray, floatColor } from "sigma/utils";
 
-import FRAGMENT_SHADER_SOURCE from "./shader-frag";
-import VERTEX_SHADER_SOURCE from "./shader-vert";
+import getFragmentShader from "./shader-frag";
+import getVertexShader from "./shader-vert";
 import { Atlas, DEFAULT_TEXTURE_MANAGER_OPTIONS, TextureManager, TextureManagerOptions } from "./texture";
+import { NodeBorderProgramOptions, DEFAULT_NODE_BORDER_OPTIONS, DEFAULT_COLOR } from "./utils";
 
 const { UNSIGNED_BYTE, FLOAT } = WebGLRenderingContext;
 
-interface CreateNodeImageProgramOptions<N extends Attributes, E extends Attributes, G extends Attributes>
-  extends TextureManagerOptions {
+type NodeImageProgramOptions<N extends Attributes, E extends Attributes, G extends Attributes> = {    
   // - If "background", color will be used to color full node behind the image.
   // - If "color", color will be used to color image pixels (for pictograms)
   drawingMode: "background" | "color";
-  // If true, the images are always cropped to the circle
-  keepWithinCircle: boolean;
   // Allows overriding drawLabel and drawHover returned class static methods.
   drawLabel: NodeLabelDrawingFunction<N, E, G> | undefined;
   drawHover: NodeHoverDrawingFunction<N, E, G> | undefined;
-  // The padding should be expressed as a [0, 1] percentage.
-  // A padding of 0.05 will always be 5% of the diameter of a node.
-  padding: number;
   // Allows using a different color attribute name.
   colorAttribute: string;
 }
 
-const DEFAULT_CREATE_NODE_IMAGE_OPTIONS: CreateNodeImageProgramOptions<Attributes, Attributes, Attributes> = {
-  ...DEFAULT_TEXTURE_MANAGER_OPTIONS,
+const DEFAULT_NODE_IMAGE_OPTIONS: NodeImageProgramOptions<Attributes, Attributes, Attributes> = {
   drawingMode: "background",
-  keepWithinCircle: true,
   drawLabel: undefined,
   drawHover: undefined,
-  padding: 0,
-  colorAttribute: "color",
-};
+  colorAttribute: "color"  
+}
+
+export interface CreateNodeImageBorderProgramOptions<N extends Attributes, E extends Attributes, G extends Attributes>
+  extends TextureManagerOptions, NodeImageProgramOptions<N, E, G>, NodeBorderProgramOptions {
+}
 
 const UNIFORMS = [
   "u_sizeRatio",
   "u_correctionRatio",
   "u_cameraAngle",
-  "u_percentagePadding",
   "u_matrix",
-  "u_colorizeImages",
-  "u_keepWithinCircle",
   "u_atlas",
+  "u_borderColor"
 ] as const;
 
 /**
@@ -63,21 +57,25 @@ export default function getNodeImageProgram<
   N extends Attributes = Attributes,
   E extends Attributes = Attributes,
   G extends Attributes = Attributes,
->(options?: Partial<CreateNodeImageProgramOptions<N, E, G>>): NodeProgramType<N, E, G> {
+  >(inputOptions?: Partial<CreateNodeImageBorderProgramOptions<N, E, G>>): NodeProgramType<N, E, G> {
+  
+  const options: CreateNodeImageBorderProgramOptions<N, E, G> = {
+    ...DEFAULT_TEXTURE_MANAGER_OPTIONS,
+    ...DEFAULT_NODE_IMAGE_OPTIONS,
+    ...DEFAULT_NODE_BORDER_OPTIONS,
+    ...(inputOptions || {}),
+    drawHover: undefined,
+    drawLabel: undefined,    
+  };
+
   const {
+    borderSize,
+    borderColor,
     drawHover,
-    drawLabel,
-    drawingMode,
-    keepWithinCircle,
-    padding,
+    drawLabel,    
     colorAttribute,
     ...textureManagerOptions
-  }: CreateNodeImageProgramOptions<N, E, G> = {
-    ...DEFAULT_CREATE_NODE_IMAGE_OPTIONS,
-    ...(options || {}),
-    drawLabel: undefined,
-    drawHover: undefined,
-  };
+  } = options;
 
   /**
    * This texture manager is shared between all instances of this exact class,
@@ -86,7 +84,7 @@ export default function getNodeImageProgram<
    */
   const textureManager = new TextureManager(textureManagerOptions);
 
-  return class NodeImageProgram extends NodeProgram<(typeof UNIFORMS)[number], N, E, G> {
+  return class NodeImageBorderProgram extends NodeProgram<(typeof UNIFORMS)[number], N, E, G> {
     static readonly ANGLE_1 = 0;
     static readonly ANGLE_2 = (2 * Math.PI) / 3;
     static readonly ANGLE_3 = (4 * Math.PI) / 3;
@@ -95,10 +93,10 @@ export default function getNodeImageProgram<
     static drawHover = drawHover;
 
     getDefinition() {
-      return {
+      const res =  {
         VERTICES: 3,
-        VERTEX_SHADER_SOURCE,
-        FRAGMENT_SHADER_SOURCE,
+        VERTEX_SHADER_SOURCE: getVertexShader(options),
+        FRAGMENT_SHADER_SOURCE: getFragmentShader(options),
         METHOD: WebGLRenderingContext.TRIANGLES,
         UNIFORMS,
         ATTRIBUTES: [
@@ -106,11 +104,27 @@ export default function getNodeImageProgram<
           { name: "a_size", size: 1, type: FLOAT },
           { name: "a_color", size: 4, type: UNSIGNED_BYTE, normalized: true },
           { name: "a_id", size: 4, type: UNSIGNED_BYTE, normalized: true },
-          { name: "a_texture", size: 4, type: FLOAT },         
+          ...{
+            [Symbol.iterator]: function* () {
+              if (!("attribute" in borderColor)) {
+                yield { name: `a_borderColor`, size: 4, type: UNSIGNED_BYTE, normalized: true };
+              }
+            }
+          },
+          ...{
+            [Symbol.iterator]: function* () {
+              if (!("attribute" in borderSize)) {
+                yield { name: `a_borderSize`, size: 1, type: FLOAT };
+              }
+            }
+          },
+          { name: "a_texture", size: 4, type: FLOAT }          
         ],
         CONSTANT_ATTRIBUTES: [{ name: "a_angle", size: 1, type: FLOAT }],
-        CONSTANT_DATA: [[NodeImageProgram.ANGLE_1], [NodeImageProgram.ANGLE_2], [NodeImageProgram.ANGLE_3]],
+        CONSTANT_DATA: [[NodeImageBorderProgram.ANGLE_1], [NodeImageBorderProgram.ANGLE_2], [NodeImageBorderProgram.ANGLE_3]],
       };
+      console.log('res', res)
+      return res;
     }
 
     atlas: Atlas;
@@ -177,6 +191,15 @@ export default function getNodeImageProgram<
       array[startIndex++] = data.size;
       array[startIndex++] = color;
       array[startIndex++] = nodeIndex;
+      
+      if ("attribute" in borderColor)
+        array[startIndex++] = floatColor(data[borderColor.attribute as "borderColor"] || borderColor.defaultValue || DEFAULT_COLOR)
+      else 
+        array[startIndex++] = 0;
+      if ("attribute" in borderSize)
+        array[startIndex++] = data[borderSize.attribute as "borderSize"] || borderSize.defaultValue
+      else 
+        array[startIndex++] = 0;      
 
       // Reference texture:
       if (imagePosition) {
@@ -199,21 +222,20 @@ export default function getNodeImageProgram<
         u_correctionRatio,
         u_matrix,
         u_atlas,
-        u_colorizeImages,
-        u_keepWithinCircle,
         u_cameraAngle,
-        u_percentagePadding,
       } = uniformLocations;
       this.latestRenderParams = params;
 
       gl.uniform1f(u_correctionRatio, params.correctionRatio);
-      gl.uniform1f(u_sizeRatio, keepWithinCircle ? params.sizeRatio : params.sizeRatio / Math.SQRT2);
+      gl.uniform1f(u_sizeRatio, params.sizeRatio);
       gl.uniform1f(u_cameraAngle, params.cameraAngle);
-      gl.uniform1f(u_percentagePadding, padding);
       gl.uniformMatrix3fv(u_matrix, false, params.matrix);
-      gl.uniform1i(u_atlas, 0);
-      gl.uniform1i(u_colorizeImages, drawingMode === "color" ? 1 : 0);
-      gl.uniform1i(u_keepWithinCircle, keepWithinCircle ? 1 : 0);
+      gl.uniform1i(u_atlas, 0);   
+      if ("value" in borderColor) {
+          const location = uniformLocations[`u_borderColor`];
+          const [r, g, b, a] = colorToArray(borderColor.value);
+          gl.uniform4f(location, r / 255, g / 255, b / 255, a / 255);
+      }      
     }
   };
 }
