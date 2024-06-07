@@ -14,7 +14,8 @@ export default () => {
     y: 0,
     size: 20,
     label: "Jim",
-    image: "https://upload.wikimedia.org/wikipedia/commons/7/7f/Jim_Morrison_1969.JPG",
+    color: 'red',
+    //image: "https://upload.wikimedia.org/wikipedia/commons/7/7f/Jim_Morrison_1969.JPG",
   });
   graph.addNode("b", {
     x: 1,

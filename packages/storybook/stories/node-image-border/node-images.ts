@@ -1,4 +1,4 @@
-import { NodeImageProgram } from "@sigma/node-image-border";
+import { createNodeImageBorderProgram  } from "@sigma/node-image-border";
 import Graph from "graphology";
 import Sigma from "sigma";
 
@@ -14,6 +14,8 @@ export default () => {
     y: 0,
     size: 20,
     label: "Jim",
+    color: "green",
+    borderColor: "blue",    
     image: "https://upload.wikimedia.org/wikipedia/commons/7/7f/Jim_Morrison_1969.JPG",
   });
   graph.addNode("b", {
@@ -21,28 +23,39 @@ export default () => {
     y: -1,
     size: 40,
     label: "Johnny",
-    image: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Johnny_Hallyday_%E2%80%94_Milan%2C_1973.jpg",
+    color: "green",
+    borderColor: "blue",    
+    alpha: 0.5,
+    image: "",
   });
   graph.addNode("c", {
     x: 3,
     y: -2,
     size: 20,
     label: "Jimi",
+    color: "green",
+    borderColor: "blue",
+    pictoColor: "red",
     image: "https://upload.wikimedia.org/wikipedia/commons/6/6c/Jimi-Hendrix-1967-Helsinki-d.jpg",
   });
   graph.addNode("d", {
+    type: 'pict',
     x: 1,
     y: -3,
-    size: 20,
+    size: 40,
     label: "Bob",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/c/c5/Bob-Dylan-arrived-at-Arlanda-surrounded-by-twenty-bodyguards-and-assistants-391770740297_%28cropped%29.jpg",
+    color: "green",
+    borderColor: "blue",
+    //pictoColor: "red",
+    image: "https://icons.getbootstrap.com/assets/icons/person.svg",
   });
   graph.addNode("e", {
     x: 3,
     y: -4,
     size: 40,
     label: "Eric",
+    borderColor: "red",
+    //pictoColor: "red",
     image: "https://upload.wikimedia.org/wikipedia/commons/b/b1/Eric_Clapton_1.jpg",
   });
   graph.addNode("f", {
@@ -50,6 +63,9 @@ export default () => {
     y: -5,
     size: 20,
     label: "Mick",
+    color: "red",
+    borderColor: "blue",
+    pictoColor: "red",
     image: "https://upload.wikimedia.org/wikipedia/commons/6/66/Mick-Jagger-1965b.jpg",
   });
 
@@ -66,9 +82,20 @@ export default () => {
   const renderer = new Sigma(graph, container, {
     defaultNodeType: "image",
     nodeProgramClasses: {
-      image: NodeImageProgram,
-    },
-  });
+      image: createNodeImageBorderProgram({
+        //border: { size: { value: 10, mode: "pixels" }, color: { attribute: "borderColor" } },  
+        border: { size: { value: 5, mode: "pixels" }, color: { attribute: "borderColor" } },  
+        padding: 0.4
+      }),
+      pict: createNodeImageBorderProgram({
+        border: { size: { value: 10, mode: "pixels" }, color: { attribute: "borderColor" } },
+        size: { mode: "force", value: 512 },        
+        drawingMode: "color",
+        padding: 0.4,
+        colorAttribute: "pictoColor",        
+      })      
+    }
+  })
 
   onStoryDown(() => {
     renderer.kill();

@@ -81,7 +81,7 @@ export default () => {
         borders: [
           { size: { value: 10, mode: "pixels" }, color: { attribute: "borderColor" } },
           { size: { fill: true }, color: { attribute: "fillColor" } },
-          { size: { value: 20, mode: "pixels" }, color: { attribute: "dotColor" } },
+          { size: { value: 10, mode: "pixels" }, color: { attribute: "dotColor" } },
         ],
       }),
     },

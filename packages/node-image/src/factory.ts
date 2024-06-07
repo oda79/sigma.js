@@ -95,7 +95,7 @@ export default function getNodeImageProgram<
     static drawHover = drawHover;
 
     getDefinition() {
-      return {
+      const res =  {
         VERTICES: 3,
         VERTEX_SHADER_SOURCE,
         FRAGMENT_SHADER_SOURCE,
@@ -111,6 +111,8 @@ export default function getNodeImageProgram<
         CONSTANT_ATTRIBUTES: [{ name: "a_angle", size: 1, type: FLOAT }],
         CONSTANT_DATA: [[NodeImageProgram.ANGLE_1], [NodeImageProgram.ANGLE_2], [NodeImageProgram.ANGLE_3]],
       };
+      console.log('FRAGMENT_SHADER_SOURCE', res.FRAGMENT_SHADER_SOURCE)
+      return res;      
     }
 
     atlas: Atlas;
