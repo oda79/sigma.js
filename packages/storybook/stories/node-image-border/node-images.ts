@@ -13,26 +13,24 @@ export default () => {
     x: 0,
     y: 0,
     size: 20,
-    label: "Jim",
     color: "green",
-    borderColor: "blue",    
+    borderColor: "blue",  
+    alpha: 0.5,
     image: "https://upload.wikimedia.org/wikipedia/commons/7/7f/Jim_Morrison_1969.JPG",
   });
   graph.addNode("b", {
     x: 1,
     y: -1,
     size: 40,
-    label: "Johnny",
-    color: "green",
+    color: "red",
     borderColor: "blue",    
-    alpha: 0.5,
+    alpha: 0.3,
     image: "",
   });
   graph.addNode("c", {
     x: 3,
     y: -2,
-    size: 20,
-    label: "Jimi",
+    size: 40,
     color: "green",
     borderColor: "blue",
     pictoColor: "red",
@@ -43,29 +41,27 @@ export default () => {
     x: 1,
     y: -3,
     size: 40,
-    label: "Bob",
     color: "green",
     borderColor: "blue",
-    //pictoColor: "red",
+    pictoColor: "red",
+    alpha: 0.5,    
     image: "https://icons.getbootstrap.com/assets/icons/person.svg",
   });
   graph.addNode("e", {
+    type: 'image-padding',
     x: 3,
     y: -4,
-    size: 40,
-    label: "Eric",
+    size: 60,
     borderColor: "red",
-    //pictoColor: "red",
+    alpha: 0.7,
     image: "https://upload.wikimedia.org/wikipedia/commons/b/b1/Eric_Clapton_1.jpg",
   });
   graph.addNode("f", {
     x: 4,
     y: -5,
-    size: 20,
-    label: "Mick",
+    size: 40,
     color: "red",
-    borderColor: "blue",
-    pictoColor: "red",
+    borderColor: "blue",        
     image: "https://upload.wikimedia.org/wikipedia/commons/6/66/Mick-Jagger-1965b.jpg",
   });
 
@@ -80,13 +76,16 @@ export default () => {
   graph.addEdge("f", "e", { size: 10 });
 
   const renderer = new Sigma(graph, container, {
-    defaultNodeType: "image",
+    defaultNodeType: "image",    
     nodeProgramClasses: {
-      image: createNodeImageBorderProgram({
-        //border: { size: { value: 10, mode: "pixels" }, color: { attribute: "borderColor" } },  
+      image: createNodeImageBorderProgram({ 
+        border: { size: { value: 5, mode: "pixels" }, color: { attribute: "borderColor" } },  
+        padding: 0
+      }),
+      'image-padding': createNodeImageBorderProgram({ 
         border: { size: { value: 5, mode: "pixels" }, color: { attribute: "borderColor" } },  
         padding: 0.4
-      }),
+      }),      
       pict: createNodeImageBorderProgram({
         border: { size: { value: 10, mode: "pixels" }, color: { attribute: "borderColor" } },
         size: { mode: "force", value: 512 },        

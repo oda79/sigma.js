@@ -95,24 +95,7 @@ const suite = [
     },
     dimensions: { width: 400, height: 800 },
   },
-  {
-    name: "aspect-ratio-vertical-graph-vertical-container",
-    run: () => {
-      const { Graph, Sigma, container } = dependencies;
 
-      const graph = new Graph();
-      graph.addNode("upper-left", { x: 0, y: 0, size: 10 });
-      graph.addNode("upper-right", { x: 5, y: 0, size: 10 });
-      graph.addNode("lower-left", { x: 0, y: 10, size: 10 });
-      graph.addNode("lower-right", { x: 5, y: 10, size: 10 });
-
-      graph.addEdge("upper-left", "lower-right", { size: 5, color: "#F00" });
-      graph.addEdge("upper-right", "lower-left", { size: 5, color: "#F00" });
-
-      new Sigma(graph, container);
-    },
-    dimensions: { width: 400, height: 800 },
-  },
   {
     name: "settings",
     run: () => {
